@@ -17,19 +17,23 @@ router.param('id', function (req, res, next, id) {
 });
 
 router.get('/', function (req, res, next) {
-	User.find({}).exec()
-	.then(function (users) {
-		res.json(users);
-	})
-	.then(null, next);
+	if(req.user) {
+		User.find({}).exec()
+		.then(function (users) {
+			res.json(users);
+		})
+		.then(null, next);
+	} else next();
 });
 
 router.post('/', function (req, res, next) {
-	User.create(req.body)
-	.then(function (user) {
-		res.status(201).json(user);
-	})
-	.then(null, next);
+	if (req.user.isAdmin) {
+		User.create(req.body)
+		.then(function (user) {
+			res.status(201).json(user);
+		})
+		.then(null, next);
+	} else next();
 });
 
 router.get('/:id', function (req, res, next) {
@@ -43,20 +47,24 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.put('/:id', function (req, res, next) {
-	_.extend(req.requestedUser, req.body);
-	req.requestedUser.save()
-	.then(function (user) {
-		res.json(user);
-	})
-	.then(null, next);
+	if(req.user._id === req.body.author._id) {
+		_.extend(req.requestedUser, req.body);
+		req.requestedUser.save()
+		.then(function (user) {
+			res.json(user);
+		})
+		.then(null, next);
+	} else next();
 });
 
 router.delete('/:id', function (req, res, next) {
-	req.requestedUser.remove()
-	.then(function () {
-		res.status(204).end();
-	})
-	.then(null, next);
+	if(req.user._id === req.body.author._id) {
+		req.requestedUser.remove()
+		.then(function () {
+			res.status(204).end();
+		})
+		.then(null, next);
+	} else next();
 });
 
 module.exports = router;

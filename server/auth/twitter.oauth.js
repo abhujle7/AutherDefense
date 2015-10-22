@@ -6,6 +6,7 @@ var TwitterStrategy = require('passport-twitter');
 
 var User = require('../api/users/user.model');
 
+
 router.get('/', passport.authenticate('twitter'));
 
 router.get('/callback', passport.authenticate('twitter', {

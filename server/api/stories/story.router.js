@@ -44,20 +44,25 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.put('/:id', function (req, res, next) {
-	_.extend(req.story, req.body);
-	req.story.save()
-	.then(function (story) {
-		res.json(story);
-	})
-	.then(null, next);
+	if(req.user._id === req.body.author._id) {
+		_.extend(req.story, req.body);
+		req.story.save()
+		.then(function (story) {
+			res.json(story);
+		})
+		.then(null, next);
+	 } else next();
 });
 
 router.delete('/:id', function (req, res, next) {
-	req.story.remove()
-	.then(function () {
-		res.status(204).end();
-	})
-	.then(null, next);
+	if(req.user._id === req.body.author._id) {
+		req.story.remove()
+		.then(function () {
+			res.status(204).end();
+		})
+		.then(null, next);
+	 } else next();
+
 });
 
 module.exports = router;

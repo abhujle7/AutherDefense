@@ -6,11 +6,6 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 var User = require('../api/users/user.model');
 
-var googleSecret;
-var fs = require('fs');
-fs.readFile('/Users/Boojlay/fullstack/secrets/googleSecret.txt', function(buffer) {
-	googleSecret = buffer.toString();
-})
 router.get('/', passport.authenticate('google', {
 	scope: 'email'
 }));
@@ -22,7 +17,7 @@ router.get('/callback', passport.authenticate('google', {
 
 passport.use(new GoogleStrategy({
 	clientID: '555799571696-ngacri6lflr9i0msjfivvviv1j3be43a.apps.googleusercontent.com',
-	clientSecret: googleSecret,
+	clientSecret: 'eRbW3rdYfkaS2x-8p928Ljcx',
 	callbackURL: 'http://127.0.0.1:8080/auth/google/callback'
 }, function (token, refreshToken, profile, done) { 
 	User.findOne({'google.id': profile.id }, function (err, user) {
