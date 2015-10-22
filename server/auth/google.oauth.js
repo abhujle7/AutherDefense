@@ -8,7 +8,7 @@ var User = require('../api/users/user.model');
 
 var googleSecret;
 var fs = require('fs');
-fs.readFile('/Users/Boojlay/fullstack/secrets', function(buffer) {
+fs.readFile('/Users/Boojlay/fullstack/secrets/googleSecret.txt', function(buffer) {
 	googleSecret = buffer.toString();
 })
 router.get('/', passport.authenticate('google', {
