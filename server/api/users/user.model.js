@@ -6,6 +6,7 @@ var mongoose = require('mongoose'),
 
 var db = require('../../db');
 var Story = require('../stories/story.model');
+var crypto = require('crypto');
 
 var User = new mongoose.Schema({
 	_id: {
@@ -25,6 +26,7 @@ var User = new mongoose.Schema({
 		unique: true
 	},
 	password: String,
+	salt: String,
 	google: {
 		id: String,
 		name: String,
@@ -52,5 +54,15 @@ var User = new mongoose.Schema({
 User.methods.getStories = function () {
 	return Story.find({author: this._id}).exec();
 };
+
+User.pre('save', function(next) {
+	if(!this.salt) {
+		var salt = crypto.randomBytes(16).toString('base64');
+		var hash = crypto.pbkdf2Sync(this.password, salt, 1, 64).toString('base64');
+		this.salt = salt;
+		this.password = hash;
+	}
+	next();
+})
 
 module.exports = db.model('User', User);

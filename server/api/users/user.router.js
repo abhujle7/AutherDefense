@@ -28,6 +28,9 @@ router.get('/', function (req, res, next) {
 
 router.post('/', function (req, res, next) {
 	if (req.user.isAdmin) {
+		for(var key in Object.keys(req.body)) {
+			req.body[key] = req.body[key].toString()
+		};
 		User.create(req.body)
 		.then(function (user) {
 			res.status(201).json(user);

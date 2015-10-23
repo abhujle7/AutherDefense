@@ -4,19 +4,37 @@ var router = require('express').Router();
 
 var HttpError = require('../utils/HttpError');
 var User = require('../api/users/user.model');
+var crypto = require('crypto');
+
+var sanitize = require('mongo-sanitize');
+
 
 router.post('/login', function (req, res, next) {
-	User.findOne(req.body).exec()
+	var clean = sanitize(req.body.email);
+	User.findOne({email: clean})
 	.then(function (user) {
 		if (!user) throw HttpError(401);
-		req.login(user, function () {
-			res.json(user);
-		});
-	})
+		var salt = user.salt;
+		var hash = crypto.pbkdf2Sync(req.body.password, salt, 1, 64).toString('base64');
+		if (user.password == hash) {
+			req.login(user, function () {
+				res.json(user);
+			});
+		} else {
+			res.send(HttpError(401));
+		}
+	})	
 	.then(null, next);
 });
 
 router.post('/signup', function (req, res, next) {
+	var salt = crypto.randomBytes(16).toString('base64');
+	var hash = crypto.pbkdf2Sync(req.body.password, salt, 1, 64).toString('base64');
+	req.body.password = hash;
+	req.body.salt = salt;
+	for(var key in Object.keys(req.body)) {
+		req.body[key] = sanitize(req.body[key]);
+	}
 	User.create(req.body)
 	.then(function (user) {
 		req.login(user, function () {
